@@ -11,7 +11,7 @@
   :root{
     --bg:#F6F4EF;
     --surface:#FFFFFF;
-    --ink:#20272B;
+    --ink:#20262B;
     --ink-soft:#5B6470;
     --teal:#0F4C5C;
     --teal-soft:#DCEAEA;
@@ -158,6 +158,22 @@
     font-size:10px;line-height:1.15;color:var(--holiday-ink);font-weight:700;
     margin-top:4px;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
+  .day__ticker{
+    width:100%;overflow:hidden;margin-top:4px;white-space:nowrap;
+    font-size:10px;line-height:1.25;color:var(--ink-soft);
+    mask-image:linear-gradient(to right,transparent 0,#000 8%,#000 92%,transparent 100%);
+    -webkit-mask-image:linear-gradient(to right,transparent 0,#000 8%,#000 92%,transparent 100%);
+  }
+  .day__ticker-track{
+    display:inline-block;min-width:100%;padding-left:100%;
+    animation:dayTicker 11s linear infinite;
+  }
+  .day:hover .day__ticker-track,
+  .day:focus-visible .day__ticker-track{animation-play-state:paused;}
+  @keyframes dayTicker{
+    from{transform:translateX(0);}
+    to{transform:translateX(-100%);}
+  }
   .day__dots{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto;}
   .dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
   .dot--more{font-size:10px;color:var(--ink-soft);font-weight:600;}
@@ -238,6 +254,7 @@
   }
   @media (prefers-reduced-motion:reduce){
     *{transition:none !important;}
+    .day__ticker-track{animation:none;padding-left:0;}
   }
 </style>
 </head>
@@ -289,7 +306,7 @@
 
   <footer class="legend" id="legend"></footer>
   <p class="sync-note" id="syncNote"></p>
-  <p class="site-author">Enrique 2027 ©</p>
+  <p class="site-author">Enrique 2026 ©</p>
 </div>
 
 <div class="modal-overlay" id="modalOverlay" hidden>
@@ -333,12 +350,12 @@
      Inicio       -> AAAA-MM-DD  (o DD/MM/AAAA)
      Fin          -> AAAA-MM-DD  (o DD/MM/AAAA). Si es un solo día, repite Inicio.
 ===================================================================== */
-const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfr6WSglFfiw1uI43_CtwyTUNfequYHQwrxj_LMU97t_OAfukWwHgZIDqz-lHKBR29ImmpaHtkdlP0/pub?gid=0&single=true&output=csv";
-const FESTIVOS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfr6WSglFfiw1uI43_CtwyTUNfequYHQwrxj_LMU97t_OAfukWwHgZIDqz-lHKBR29ImmpaHtkdlP0/pub?gid=1581786704&single=true&output=csv"; // Pega aquí la URL CSV de la hoja Festivos cuando la publiques
-const EVALUACIONES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfr6WSglFfiw1uI43_CtwyTUNfequYHQwrxj_LMU97t_OAfukWwHgZIDqz-lHKBR29ImmpaHtkdlP0/pub?gid=1223748124&single=true&output=csv"; // Pega aquí la URL CSV de la hoja Evaluaciones cuando la publiques
-const VARIOS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSfr6WSglFfiw1uI43_CtwyTUNfequYHQwrxj_LMU97t_OAfukWwHgZIDqz-lHKBR29ImmpaHtkdlP0/pub?gid=1748267025&single=true&output=csv"; // Pega aquí la URL CSV de la hoja Varios cuando la publiques
-const CURSO_INICIO = { year: 2026, month: 8 };  // septiembre 2026
-const CURSO_FIN    = { year: 2027, month: 6 };  // julio 2027
+const CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyfOCBIWoofZ8zSvL0m48WZGZA74YtzAih5Rp2LAIyzEfZFFHeS7ljnyX-vvmyYFxL0AxvEczoWQRU/pubhtml?gid=846740751&single=true";
+const FESTIVOS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyfOCBIWoofZ8zSvL0m48WZGZA74YtzAih5Rp2LAIyzEfZFFHeS7ljnyX-vvmyYFxL0AxvEczoWQRU/pubhtml?gid=833676004&single=true"; // Pega aquí la URL CSV de la hoja Festivos cuando la publiques
+const EVALUACIONES_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyfOCBIWoofZ8zSvL0m48WZGZA74YtzAih5Rp2LAIyzEfZFFHeS7ljnyX-vvmyYFxL0AxvEczoWQRU/pubhtml?gid=489815833&single=true"; // Pega aquí la URL CSV de la hoja Evaluaciones cuando la publiques
+const VARIOS_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vRyfOCBIWoofZ8zSvL0m48WZGZA74YtzAih5Rp2LAIyzEfZFFHeS7ljnyX-vvmyYFxL0AxvEczoWQRU/pubhtml?gid=218895508&single=true"; // Pega aquí la URL CSV de la hoja Varios cuando la publiques
+const CURSO_INICIO = { year: 2026, month: 8 };  // septiembre 2025
+const CURSO_FIN    = { year: 2027, month: 6 };  // julio 2026
 /* ===================================================================== */
 
 const MESES = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
@@ -835,7 +852,14 @@ function renderMonth(){
 
     const holidayHtml = isHoliday ? `<span class="day__holiday">${escapeHtml(dayHolidays[0].nombre)}</span>` : '';
     const evaluationHtml = isEvaluation ? `<span class="day__evaluation">${escapeHtml(dayEvaluations[0].evaluacion)}</span>` : '';
-    btn.innerHTML = `<span class="day__num">${d}</span>${holidayHtml}${evaluationHtml}<span class="day__dots">${dotsHtml}</span>`
+    const tickerText = dayEvents
+      .map(ev => ev.desc || ev.titulo)
+      .filter(Boolean)
+      .join(' · ');
+    const tickerHtml = tickerText
+      ? `<span class="day__ticker" aria-hidden="true"><span class="day__ticker-track">${escapeHtml(tickerText)}</span></span>`
+      : '';
+    btn.innerHTML = `<span class="day__num">${d}</span>${holidayHtml}${evaluationHtml}${tickerHtml}<span class="day__dots">${dotsHtml}</span>`
       + (isToday ? '<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>' : '');
 
     btn.addEventListener('click', () => openModal(date, dayEvents));
@@ -942,7 +966,7 @@ $('todayBtn').addEventListener('click', () => {
 
 renderMonthSelector();
 loadData();
-setInterval(loadData, 1 * 60 * 1000); // refresca datos cada 1 minutos
+setInterval(loadData, 5 * 60 * 1000); // refresca datos cada 5 minutos
 </script>
 </body>
 </html>
